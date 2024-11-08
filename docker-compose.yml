@@ -19,8 +19,8 @@ services:
   open-webui-pipeline:
     container_name: open-webui-pipeline
     build:
-      context: ./OpenWebUI/pipelines
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: Dockerfile-openwebui-pipeline
     volumes:
       - open-webui-pipeline-data:/app/backend/data
     ports:

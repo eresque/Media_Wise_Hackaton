@@ -14,7 +14,11 @@
 # Project launch 
 ## Requirements
 `Python version >= 3.11` </br>
-`Docker engine`
+`Docker engine` </br>
+`.env` file in project root with such structure:
+```commandline
+IAM_TOKEN=<your_personal_iam_token>
+```
 ## Launch commands 
 ```commandline
 docker compose up --build 

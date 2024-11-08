@@ -3,3 +3,5 @@
 blueprints/
 
 .DS_Store
+
+.env
