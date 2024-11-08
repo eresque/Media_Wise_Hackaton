@@ -2,11 +2,16 @@ from typing import List, Union, Generator, Iterator
 from pydantic import BaseModel
 from pymilvus import MilvusClient
 
-from lib import text2vec
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
+
+def text2vec(data: list[str]) -> list[list]:
+    pass
+
+def pdf2text(url: str) -> list[dict]:
+    pass
 
 class Pipeline:
     class Valves(BaseModel):

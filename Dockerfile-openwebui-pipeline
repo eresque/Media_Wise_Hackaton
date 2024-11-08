@@ -7,4 +7,5 @@ RUN pip install -r ./extra_requirements.txt
 COPY ./OpenWebUI/pipelines/generation.py ./pipelines
 COPY ./OpenWebUI/pipelines/insertion.py ./pipelines
 
+
 ENTRYPOINT [ "bash", "start.sh" ]
