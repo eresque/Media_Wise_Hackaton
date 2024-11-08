@@ -1,2 +1,4 @@
 .venv/
 blueprints/
+
+.DS_Store/
