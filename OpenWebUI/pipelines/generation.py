@@ -1,9 +1,12 @@
 from typing import List, Union, Generator, Iterator
 from pydantic import BaseModel
 from pymilvus import MilvusClient
-import logging
 
-logging.basicConfig(level=logging.INFO)
+from lib import text2vec
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 class Pipeline:
     class Valves(BaseModel):
@@ -24,4 +27,4 @@ class Pipeline:
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
-        return f'{user_message}, {model_id}'
+        return 'working'#self.milvus_client.search('embeddings', )
