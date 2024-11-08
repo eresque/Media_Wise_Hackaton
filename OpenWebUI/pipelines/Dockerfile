@@ -5,5 +5,6 @@ COPY requirements.txt ./extra_requirements.txt
 RUN pip install -r ./extra_requirements.txt
 
 COPY generation.py ./pipelines
+COPY insertion.py ./pipelines
 
 ENTRYPOINT [ "bash", "start.sh" ]

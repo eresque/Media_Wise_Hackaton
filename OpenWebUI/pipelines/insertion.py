@@ -21,7 +21,7 @@ class Pipeline:
         pass
 
     def __init__(self):
-        self.name = "Generation"
+        self.name = "Insertion"
 
     async def on_startup(self):
         # This function is called when the server is started.
@@ -37,5 +37,4 @@ class Pipeline:
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
         
-
         return client.get_load_state(collection_name="quick_setup")
