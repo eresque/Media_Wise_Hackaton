@@ -5,16 +5,8 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-client = MilvusClient(
-    uri="http://milvus-standalone:19530",
-    token="root:Milvus",
-    db_name='default'
-)
-
-client.create_collection(
-    collection_name="quick_setup",
-    dimension=5
-)
+client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
+client.create_collection('embeddings', 1024)
 
 class Pipeline:
     class Valves(BaseModel):
@@ -38,4 +30,4 @@ class Pipeline:
     ) -> Union[str, Generator, Iterator]:
         
 
-        return client.get_load_state(collection_name="quick_setup")
+        return ''.join(client.list_collections())
