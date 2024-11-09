@@ -94,7 +94,8 @@ class Pipeline:
             } for i in range(len(vectors))]
 
             collection.insert(data)
-
+            
+        collection.flush()
         res = json.dumps([collection.num_entities])
 
         return res
