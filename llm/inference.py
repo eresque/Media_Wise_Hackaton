@@ -71,10 +71,8 @@ async def llm_response_streaming(query: Query):
         with requests.post(url, headers=headers, json=request_data, stream=True) as r:
             r.raise_for_status()
             for chunk in r.iter_content(1024):
-                if chunk.status_code == 200:
-                    response_text = json.loads(chunk)['result']['alternatives'][0]['message']['text']
-
-                    yield json.dumps({"response": response_text}).encode()
+                response_text = json.loads(chunk)['result']['alternatives'][0]['message']['text']
+                yield json.dumps({"response": response_text}).encode()
 
     return StreamingResponse(streamer())
 
