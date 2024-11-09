@@ -4,10 +4,15 @@ from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
 import asyncio
 
+import os
+
+os.environ['HF_HOME'] = '/models'
+
 model = SentenceTransformer('deepvk/USER-bge-m3')
 
 app = FastAPI()
-app.add_middleware( CORSMiddleware, allow_origins=['*'] )
+app.add_middleware(CORSMiddleware, allow_origins=['*'])
+
 
 class SentenceRequest(BaseModel):
     sentences: list[str]
