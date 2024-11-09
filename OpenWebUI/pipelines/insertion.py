@@ -62,7 +62,13 @@ class Pipeline:
                     if table[1] == 'page':
                         page_data[table[1]] = table[3]
 
+                if len(collection.query(f'orig_file == {page_data["source"]}')) > 0:
+                    yield f'Detected existing file {page_data["source"]}\n'
+                    continue
+
                 meta_data.append(page_data)
+
+            
 
             document_content = [page['chroma:document'] for page in meta_data]
             vectors = text2vec(document_content)
