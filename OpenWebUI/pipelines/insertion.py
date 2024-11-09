@@ -1,6 +1,6 @@
 from typing import List, Union, Generator, Iterator
 from pydantic import BaseModel
-from pymilvus import MilvusClient, Collection
+from pymilvus import MilvusClient, Collection, connections
 import pymupdf
 import sqlite3
 
@@ -51,10 +51,12 @@ class Pipeline:
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
-        milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
+        connections.connect(host='milvus-standalone', port='19530', token='root:Milvus')
+        collection = Collection('embeddings')
 
-        if not milvus_client.has_collection(collection_name='embeddings'):
-            milvus_client.create_collection('embeddings', 1024, auto_id=True)
+        # milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
+        # if not milvus_client.has_collection(collection_name='embeddings'):
+        #     milvus_client.create_collection('embeddings', 1024, auto_id=True)
 
         conn = sqlite3.connect('./backend/data/vector_db/chroma.sqlite3')
         cursor = conn.cursor()
@@ -91,12 +93,8 @@ class Pipeline:
                 'orig_file': meta_data[i]['source']
             } for i in range(len(vectors))]
 
-            milvus_client.insert('embeddings', data=data)
+            collection.insert(data)
 
-        Collection('embeddings').flush()
-
-        res = json.dumps(milvus_client.get_collection_stats('embeddings'))
-
-        milvus_client.close()
+        res = json.dumps(collection.indexes)
 
         return res
