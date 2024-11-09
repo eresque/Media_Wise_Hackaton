@@ -39,6 +39,14 @@ class Pipeline:
         connections.connect(host='milvus-standalone', port='19530', token='root:Milvus')
         collection = Collection('embeddings')
 
+        index_params = {
+            "metric_type":"COSINE",
+            "index_type":"HNSW",
+            #"params":{"nlist":1024}
+        }
+
+        collection.create_index('vector', index_params)
+
         conn = sqlite3.connect('./backend/data/vector_db/chroma.sqlite3')
         cursor = conn.cursor()
 
