@@ -1,6 +1,7 @@
 from typing import List, Union, Generator, Iterator
 from pydantic import BaseModel
 from pymilvus import MilvusClient, Collection, connections
+from pymilvus.client.abstract import SearchResult
 
 from dotenv import load_dotenv
 import requests
@@ -41,7 +42,7 @@ class Pipeline:
 
         collection.load()
 
-        res = collection.search(
+        res: SearchResult = collection.search(
             data=vector,
             anns_field='vector',
             param=search_params,
@@ -49,10 +50,11 @@ class Pipeline:
             output_fields=['page_num', 'text', 'orig_file']
         )
 
-        yield 'Top 10 results:\n'
-        for hit in res[0]:
-            yield f'ID: {hit.id}, Distance: {hit.distance}\n'
+        for hits in res:
+            for hit in hits:
+                yield f'db id: {hit.entity.get('id')}\n'
+                yield f'page: {hit.entity.get('page_num')}\n'
+                yield f'orig_file: {hit.entity.get('orig_file')}\n'
+                yield f'text: {hit.entity.get('text')}\n\n'
 
         collection.release()
-
-        return 

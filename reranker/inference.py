@@ -1,9 +1,11 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sentence_transformers import CrossEncoder
 import asyncio
 
 app = FastAPI()
+app.add_middleware( CORSMiddleware, allow_origins=['*'] )
 
 RERANKER_MODEL = CrossEncoder('DiTy/cross-encoder-russian-msmarco', max_length=512, device='cuda')
 
