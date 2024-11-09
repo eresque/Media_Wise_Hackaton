@@ -78,10 +78,18 @@ class Pipeline:
 
         yield f'File: {top_file_name}\nPage: {top_metadata[0]["page"] + 1}\n'
 
+        prev_response = ''
+
         with requests.post('http://llm_inference:8087/llm-response-streaming', json={
-            'prompt': latest_message,
-            'context': ' '.join([doc_data[1] for doc_data in rerank_response['ranked_documents']])
+                'prompt': latest_message,
+                'context': ' '.join([doc_data[1] for doc_data in rerank_response['ranked_documents']])
             }, stream=True) as r:
             r.raise_for_status()
-            for chunk in r.iter_content(1024):  # or, for line in r.iter_lines():
-                yield json.loads(chunk)['response']
+            for chunk in r.iter_content(1024):
+                yield chunk
+                
+                resp = json.loads(chunk)['response']
+
+                yield resp.replace(prev_response, '')
+
+                prev_response = resp
