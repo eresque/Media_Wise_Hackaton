@@ -47,7 +47,7 @@ class Pipeline:
             anns_field='vector',
             param=search_params,
             limit=10, #TDB
-            output_fields=['page_num', 'text', 'orig_file']
+            output_fields=['id', 'page_num', 'text', 'orig_file']
         )
 
         documents = []
@@ -56,11 +56,14 @@ class Pipeline:
             for hit in hits:
                 documents.append(hit.entity.get('text'))
 
-                yield f'db id: {hit.entity.get("id")}\n'
-                yield f'page: {hit.entity.get("page_num")}\n'
-                yield f'orig_file: {hit.entity.get("orig_file")}\n'
-                yield f'text: {hit.entity.get("text")}\n\n'
+
 
         collection.release()
 
-        #response = requests.post()
+        response = requests.post('http://reranker_inference:8081', json={
+            'query': user_message,
+            'documents': documents,
+        }).json()
+
+        yield json.dumps(response)
+
