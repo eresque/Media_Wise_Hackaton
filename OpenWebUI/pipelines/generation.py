@@ -38,7 +38,6 @@ class Pipeline:
         collection = Collection('embeddings')
 
         res = collection.search(
-            collection_name='embeddings',
             data=vector,
             limit=10, #TDB
             output_fields=['page_num', 'text', 'orig_file']
