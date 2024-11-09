@@ -100,6 +100,14 @@ services:
       - .env
     restart: unless-stopped
 
+  reranker_inference:
+    container_name: reranker_inference
+    build:
+      context: ./reranker
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8089"
+    restart: unless-stopped
 
 networks:
   default:
