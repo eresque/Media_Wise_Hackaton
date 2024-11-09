@@ -63,14 +63,14 @@ class Pipeline:
         yield json.dumps({
             'query': user_message,
             'documents': documents,
-        })
+        }, ensure_ascii=False)
 
         response = requests.post('http://reranker_inference:8081/rerank', json={
             'query': user_message,
             'documents': documents,
         }).json()
 
-        yield json.dumps(response)
+        yield json.dumps(response, ensure_ascii=False)
 
 
 
