@@ -39,13 +39,10 @@ class Pipeline:
         self.name = "Insertion"
 
     async def on_startup(self):
-        self.milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
-
-        if not self.milvus_client.has_collection(collection_name='embeddings'):
-            self.milvus_client.create_collection('embeddings', 1024, auto_id=True)
+        pass
         
     async def on_shutdown(self):
-        self.milvus_client.close()
+        pass
 
     async def inlet(self, body: dict, user: dict) -> dict:
         body['file_data'] = body['files']
@@ -54,6 +51,11 @@ class Pipeline:
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
+        self.milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
+
+        if not self.milvus_client.has_collection(collection_name='embeddings'):
+            self.milvus_client.create_collection('embeddings', 1024, auto_id=True)
+
         conn = sqlite3.connect('./backend/data/vector_db/chroma.sqlite3')
         cursor = conn.cursor()
 
@@ -91,4 +93,6 @@ class Pipeline:
 
             self.milvus_client.insert('embeddings', data=data)
 
-        return json.dumps(self.milvus_client.get_collection_stats('embeddings'))
+        self.milvus_client.close()
+
+        return json.dumps(self.milvus_client.describe_collection('embeddings'))
