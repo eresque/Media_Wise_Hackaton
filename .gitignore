@@ -1,6 +1,10 @@
+# Folders
 .venv/
 .idea/
 volumes/
-.DS_Store
+__pycache__/
 
+# Files
+.DS_Store
 .env
+
