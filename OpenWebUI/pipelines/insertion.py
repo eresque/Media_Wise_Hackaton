@@ -1,6 +1,6 @@
 from typing import List, Union, Generator, Iterator
 from pydantic import BaseModel
-from pymilvus import MilvusClient
+from pymilvus import MilvusClient, Collection
 import pymupdf
 import sqlite3
 
@@ -82,11 +82,6 @@ class Pipeline:
             document_content = [page['chroma:document'] for page in meta_data]
             vectors = text2vec(document_content)
 
-            import logging
-            logging.basicConfig(level=logging.INFO)
-
-            logging.info(vectors)
-
             data = [ {
                 'vector': vectors[i],
                 'text': document_content[i],
@@ -96,4 +91,4 @@ class Pipeline:
 
             self.milvus_client.insert('embeddings', data=data)
 
-        return '\n'.join(self.milvus_client.list_indexes('embeddings', 'orig_file'))
+        return json.dumps(self.milvus_client.get_collection_stats('embeddings'))
