@@ -85,7 +85,7 @@ class Pipeline:
                 'context': ' '.join([doc_data[1] for doc_data in rerank_response['ranked_documents']])
             }, stream=True) as r:
             r.raise_for_status()
-            for chunk in r.iter_content(): 
+            for chunk in r.iter_content(chunk_size=None): 
                 yield chunk.decode('utf-8')
 
                 resp = json.loads(chunk)['response']
