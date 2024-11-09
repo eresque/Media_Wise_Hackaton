@@ -58,7 +58,7 @@ services:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/minio:/minio_data
     command: minio server /minio_data --console-address ":9001"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3
@@ -67,7 +67,7 @@ services:
   standalone:
     container_name: milvus-standalone
     image: milvusdb/milvus:v2.4.15
-    command: [ "milvus", "run", "standalone" ]
+    command: ["milvus", "run", "standalone"]
     security_opt:
       - seccomp:unconfined
     environment:
@@ -76,7 +76,7 @@ services:
     volumes:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/milvus:/var/lib/milvus
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9091/healthz" ]
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
       interval: 30s
       start_period: 90s
       timeout: 20s
@@ -89,25 +89,25 @@ services:
       - "minio"
     restart: unless-stopped
 
-  llm_inference:
-    container_name: llm_inference
-    build:
-      context: ./llm
-      dockerfile: Dockerfile
-    ports:
-      - "8087:8087"
-    env_file:
-      - .env
-    restart: unless-stopped
+  # llm_inference:
+  #   container_name: llm_inference
+  #   build:
+  #     context: ./llm
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8087:8087"
+  #   env_file:
+  #     - .env
+  #   restart: unless-stopped
 
-  reranker_inference:
-    container_name: reranker_inference
-    build:
-      context: ./reranker
-      dockerfile: Dockerfile
-    ports:
-      - "8089:8089"
-    restart: unless-stopped
+  # reranker_inference:
+  #   container_name: reranker_inference
+  #   build:
+  #     context: ./reranker
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8089:8089"
+  #   restart: unless-stopped
 
 networks:
   default:

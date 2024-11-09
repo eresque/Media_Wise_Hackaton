@@ -1,6 +1,7 @@
 from typing import List, Union, Generator, Iterator
 from pydantic import BaseModel
 from pymilvus import MilvusClient
+import pymupdf
 
 from dotenv import load_dotenv
 
@@ -10,7 +11,19 @@ def text2vec(data: list[str]) -> list[list]:
     pass
 
 def pdf2text(url: str) -> list[dict]:
-    pass
+    result = []
+
+
+
+    doc = pymupdf.Document("a.pdf")
+    for page in doc:
+        text = page.get_text().encode("utf8")
+        result.append({
+            'page_num': page.number,
+            'text': text,
+        })
+
+    return result
 
 class Pipeline:
     class Valves(BaseModel):
@@ -46,7 +59,9 @@ class Pipeline:
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
         file_paths = body.get('file_paths', [])
-
-        return self.temp_data[0]['file']['data']['content']
+        for path in file_paths:
+            pass
+        import json
+        return json.dumps(self.temp_data, ensure_ascii=False)
 
         

@@ -68,3 +68,4 @@ llama-index-llms-ollama
 pymilvus==2.3.7
 
 python-dotenv==1.0.1
+PyMuPDF
