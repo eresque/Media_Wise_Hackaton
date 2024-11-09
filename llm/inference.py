@@ -3,6 +3,7 @@ from typing import Optional
 
 import httpx
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from pydantic import BaseModel
@@ -11,6 +12,10 @@ from dotenv import load_dotenv
 from prompts import PROMPTS
 
 import logging
+
+import requests
+
+import json
 
 logging.basicConfig(level=logging.INFO)
 
@@ -35,6 +40,43 @@ headers = {
 class Query(BaseModel):
     prompt: str
     context: Optional[str] = ""
+
+@app.post('/llm-response-streaming')
+async def llm_response_streaming(query: Query):
+    def streamer():
+        _question = QUESTION.format(
+            context=query.context,
+            prompt=query.prompt,
+        )
+
+        request_data = {
+            "modelUri": "gpt://b1gjp5vama10h4due384/yandexgpt-32k/rc",
+            "completionOptions": {
+                "stream": True,
+                "temperature": 0.2,
+                "maxTokens": "32000"
+            },
+            "messages": [
+                {
+                    "role": "system",
+                    "text": f"{LLM_INSTRUCTION}"
+                },
+                {
+                    "role": "user",
+                    "text": f"{_question}"
+                }
+            ]
+        }
+
+        with requests.post(url, headers=headers, json=request_data, stream=True) as r:
+            r.raise_for_status()
+            for chunk in r.iter_content(1024):
+                if chunk.status_code == 200:
+                    response_text = json.loads(chunk)['result']['alternatives'][0]['message']['text']
+
+                    yield json.dumps({"response": response_text}).encode()
+
+    return StreamingResponse(streamer())
 
 
 @app.post("/llm-response")
