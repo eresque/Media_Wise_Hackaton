@@ -22,7 +22,7 @@ class RerankRequest(BaseModel):
 def rerank_documents(query: str, documents: list, top_k: int = 3):
     pairs = [[query, doc] for doc in documents]
     scores = RERANKER_MODEL.predict(pairs)
-    scored_documents = list(zip(scores, documents))
+    scored_documents = list(zip(scores.tolist(), documents))
     ranked_documents = sorted(scored_documents, key=lambda x: x[0], reverse=True)
     top_k = min(top_k, len(ranked_documents))
     top_results = ranked_documents[:top_k]
