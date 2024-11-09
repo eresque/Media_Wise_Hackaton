@@ -31,7 +31,9 @@ class Pipeline:
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
-        vector = text2vec([user_message])
+        latest_message = messages[-1]['content']
+
+        vector = text2vec([latest_message])
 
         connections.connect(host='milvus-standalone', port='19530', token='root:Milvus')
         collection = Collection('embeddings')
@@ -66,7 +68,7 @@ class Pipeline:
         collection.release()
 
         rerank_response = requests.post('http://reranker_inference:8081/rerank', json={
-            'query': user_message,
+            'query': latest_message,
             'documents': documents,
         }).json()
 
@@ -77,14 +79,13 @@ class Pipeline:
         yield f'File: {top_file_name}\nPage: {top_metadata[0]["page"] + 1}'
 
         yield json.dumps({
-            'prompt': user_message,
+            'prompt': latest_message,
             'context': ' '.join([doc_data[1] for doc_data in rerank_response['ranked_documents']])
         })
 
         llm_response = requests.post('http://llm_inference:8087/llm-response', json={
-            'prompt': user_message,
+            'prompt': latest_message,
             'context': ' '.join([doc_data[1] for doc_data in rerank_response['ranked_documents']])
         }).json()
 
         yield llm_response['response']
-
