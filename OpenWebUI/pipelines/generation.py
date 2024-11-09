@@ -7,10 +7,7 @@ import os
 
 load_dotenv()
 
-def text2vec(data: list[str]) -> list[list]:
-    pass
-
-def pdf2text(url: str) -> list[dict]:
+def text2vec(data: str) -> list[list]:
     pass
 
 class Pipeline:
@@ -23,8 +20,8 @@ class Pipeline:
     async def on_startup(self):
         self.milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
 
-        if 'embeddings' not in self.milvus_client.list_collections():
-            self.milvus_client.create_collection('embeddings', 1024)
+        if not self.milvus_client.has_collection(collection_name='embeddings'):
+            self.milvus_client.create_collection('embeddings', 1024, auto_id=True)
 
     async def on_shutdown(self):
         self.milvus_client.close()
@@ -32,4 +29,16 @@ class Pipeline:
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
-        return 'working'#self.milvus_client.search('embeddings', )
+        
+        vector = text2vec(user_message)
+
+        res = self.milvus_client.search(
+            collection_name='embeddings',
+            data=vector,
+            limit=10, #TDB
+            output_fields=['page_num', 'text', 'orig_file']
+        )
+
+        
+
+        return 'working'

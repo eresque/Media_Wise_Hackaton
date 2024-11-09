@@ -22,7 +22,7 @@ services:
       context: ./
       dockerfile: Dockerfile-openwebui-pipeline
     volumes:
-      - open-webui-pipeline-data:/app/backend/data
+      - open-webui-data:/app/backend/data
     ports:
       - "9099:9099"
     restart: unless-stopped
@@ -89,25 +89,25 @@ services:
       - "minio"
     restart: unless-stopped
 
-  # llm_inference:
-  #   container_name: llm_inference
-  #   build:
-  #     context: ./llm
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8087:8087"
-  #   env_file:
-  #     - .env
-  #   restart: unless-stopped
+  llm_inference:
+    container_name: llm_inference
+    build:
+      context: ./llm
+      dockerfile: Dockerfile
+    ports:
+      - "8087:8087"
+    env_file:
+      - .env
+    restart: unless-stopped
 
-  # reranker_inference:
-  #   container_name: reranker_inference
-  #   build:
-  #     context: ./reranker
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8089:8089"
-  #   restart: unless-stopped
+  reranker_inference:
+    container_name: reranker_inference
+    build:
+      context: ./reranker
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8089"
+    restart: unless-stopped
 
 networks:
   default:
@@ -115,4 +115,4 @@ networks:
 
 volumes:
   open-webui-data:
-  open-webui-pipeline-data:
+  #open-webui-pipeline-data:

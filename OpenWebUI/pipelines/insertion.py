@@ -7,20 +7,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def text2vec(data: list[str]) -> list[list]:
-    pass
+import logging
+logging.basicConfig(level=logging.INFO)
 
-def pdf2text(url: str) -> list[dict]:
+def text2vec(text: str) -> list:
+    return [1 for _ in range(1024)]
+
+def pdf2text(path: str) -> list[dict]:
     result = []
 
+    doc = pymupdf.open(path)
 
-
-    doc = pymupdf.Document("a.pdf")
     for page in doc:
-        text = page.get_text().encode("utf8")
+        text = page.get_text()
         result.append({
             'page_num': page.number,
             'text': text,
+            'path': path,
         })
 
     return result
@@ -35,9 +38,9 @@ class Pipeline:
     async def on_startup(self):
         self.milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
 
-        if 'embeddings' not in self.milvus_client.list_collections():
-            self.milvus_client.create_collection('embeddings', 1024)
-
+        if not self.milvus_client.has_collection(collection_name='embeddings'):
+            self.milvus_client.create_collection('embeddings', 1024, auto_id=True)
+        
     async def on_shutdown(self):
         self.milvus_client.close()
 
@@ -46,22 +49,30 @@ class Pipeline:
 
         paths = []
         files = body.get("files", [])
-        for file in files:
-            content_url = file["url"] + "/content"
+        for file_data in files:
+            file = file_data['file']
+
             paths.append({
-                'name': file['name'],
-                'path': content_url,
+                'name': file['filename'],
+                'path': './backend/data/uploads/' + file['filename'],
             })
-        body['file_paths'] = paths
+        body['file_data'] = paths
         return body
 
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
-        file_paths = body.get('file_paths', [])
-        for path in file_paths:
-            pass
-        import json
-        return json.dumps(self.temp_data, ensure_ascii=False)
+        for pdf in body.get('file_data', []):
+            for page in pdf2text(pdf['path']):
+                vector = text2vec(page['text']) # TODO: IMPLEMENT
+                data = {
+                    'vector': vector,
+                    'text': page['text'],
+                    'page_num': page['page_num'],
+                    'orig_file': page['path'],
+                }
 
+                self.milvus_client.insert(collection_name='embeddings', data=data)
+        return 'Knowledge-base updated!'
+        
         
