@@ -1,14 +1,17 @@
 from typing import List, Union, Generator, Iterator
 from pydantic import BaseModel
-from pymilvus import MilvusClient
+from pymilvus import MilvusClient, Collection, connections
 
 from dotenv import load_dotenv
-import os
+import requests
+import json
 
 load_dotenv()
 
-def text2vec(data: str) -> list[list]:
-    pass
+def text2vec(doc: list[str]) -> list:
+    return requests.post('http://embedder_inference:8082/embed', json={
+        'sentences': doc
+    }).json()['embeddings']
 
 class Pipeline:
     class Valves(BaseModel):
@@ -18,7 +21,10 @@ class Pipeline:
         self.name = "Generation" 
 
     async def on_startup(self):
-        pass
+        milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
+        if not milvus_client.has_collection(collection_name='embeddings'):
+            milvus_client.create_collection('embeddings', 1024, auto_id=True)
+        milvus_client.close()
 
     async def on_shutdown(self):
         pass
@@ -26,21 +32,16 @@ class Pipeline:
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
-        
-        self.milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
-
-        if not self.milvus_client.has_collection(collection_name='embeddings'):
-            self.milvus_client.create_collection('embeddings', 1024, auto_id=True)
-        
         vector = text2vec(user_message)
 
-        res = self.milvus_client.search(
+        connections.connect(host='milvus-standalone', port='19530', token='root:Milvus')
+        collection = Collection('embeddings')
+
+        res = collection.search(
             collection_name='embeddings',
             data=vector,
             limit=10, #TDB
             output_fields=['page_num', 'text', 'orig_file']
         )
 
-        self.milvus_client.close()
-
-        return 'working'
+        return json.dumps(res)

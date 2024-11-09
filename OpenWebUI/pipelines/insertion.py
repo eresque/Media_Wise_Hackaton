@@ -16,21 +16,6 @@ def text2vec(doc: list[str]) -> list:
         'sentences': doc
     }).json()['embeddings']
 
-def pdf2text(path: str) -> list[dict]:
-    result = []
-
-    doc = pymupdf.open(path)
-
-    for page in doc:
-        text = page.get_text()
-        result.append({
-            'page_num': page.number,
-            'text': text,
-            'path': path,
-        })
-
-    return result
-
 class Pipeline:
     class Valves(BaseModel):
         pass
@@ -39,7 +24,10 @@ class Pipeline:
         self.name = "Insertion"
 
     async def on_startup(self):
-        pass
+        milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
+        if not milvus_client.has_collection(collection_name='embeddings'):
+            milvus_client.create_collection('embeddings', 1024, auto_id=True)
+        milvus_client.close()
         
     async def on_shutdown(self):
         pass
@@ -53,10 +41,6 @@ class Pipeline:
     ) -> Union[str, Generator, Iterator]:
         connections.connect(host='milvus-standalone', port='19530', token='root:Milvus')
         collection = Collection('embeddings')
-
-        # milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
-        # if not milvus_client.has_collection(collection_name='embeddings'):
-        #     milvus_client.create_collection('embeddings', 1024, auto_id=True)
 
         conn = sqlite3.connect('./backend/data/vector_db/chroma.sqlite3')
         cursor = conn.cursor()
@@ -96,6 +80,7 @@ class Pipeline:
             collection.insert(data)
             
         collection.flush()
+
         res = json.dumps([collection.num_entities])
 
         return res
