@@ -93,6 +93,8 @@ class Pipeline:
 
             milvus_client.insert('embeddings', data=data)
 
+        Collection('embeddings').flush()
+
         res = json.dumps(milvus_client.get_collection_stats('embeddings'))
 
         milvus_client.close()
