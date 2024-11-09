@@ -95,6 +95,6 @@ class Pipeline:
 
             collection.insert(data)
 
-        res = json.dumps(collection.indexes)
+        res = json.dumps(collection.describe())
 
         return res
