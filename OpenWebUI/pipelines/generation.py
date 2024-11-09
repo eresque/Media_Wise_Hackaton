@@ -74,7 +74,7 @@ class Pipeline:
 
         top_file_name = top_metadata[0]['orig'].split('/')[-1].split('_')[1].split('.')[0]
 
-        yield f'File: {top_file_name}\nPage: {top_metadata["page"]}'
+        yield f'File: {top_file_name}\nPage: {top_metadata[0]["page"]}'
 
         llm_response = requests.post('http://llm_inference:8087/llm-response', json={
             'prompt': user_message,
