@@ -3,6 +3,8 @@ from typing import Optional
 
 import httpx
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -13,6 +15,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
+app.add_middleware( CORSMiddleware, allow_origins=['*'] )
+
 
 LLM_INSTRUCTION = PROMPTS['llm_instructions']
 QUESTION = PROMPTS['question']
