@@ -2,6 +2,7 @@ from typing import List, Union, Generator, Iterator
 from pydantic import BaseModel
 from pymilvus import MilvusClient
 import pymupdf
+import sqlite3
 
 from dotenv import load_dotenv
 
@@ -33,7 +34,7 @@ class Pipeline:
         pass
 
     def __init__(self):
-        self.name = "Insertion" 
+        self.name = "Insertion"
 
     async def on_startup(self):
         self.milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
@@ -45,34 +46,38 @@ class Pipeline:
         self.milvus_client.close()
 
     async def inlet(self, body: dict, user: dict) -> dict:
-        self.temp_data = body['files']
-
-        paths = []
-        files = body.get("files", [])
-        for file_data in files:
-            file = file_data['file']
-
-            paths.append({
-                'name': file['filename'],
-                'path': './backend/data/uploads/' + file['filename'],
-            })
-        body['file_data'] = paths
+        body['file_data'] = body['files']
         return body
 
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
-        for pdf in body.get('file_data', []):
-            for page in pdf2text(pdf['path']):
-                vector = text2vec(page['text']) # TODO: IMPLEMENT
+        conn = sqlite3.connect('./backend/data/vector_db/chroma.sqlite3')
+        cursor = conn.cursor()
+
+        for file_data in body.get('file_data'):
+            file_id = file_data['id']
+        
+            cursor.execute(f'SELECT id FROM embedding_metadata WHERE "key" = "file_id" and "string_value" = "{file_id}"')
+            table_ids = cursor.fetchall()
+
+            for table_id in table_ids:
+                page_data = {}
+
+                cursor.execute(f'SELECT * FROM embedding_metadata WHERE "id" = {table_id[0]}')
+                tables = cursor.fetchall()
+
+                for table in tables:
+                    if table[1] == 'source' or table[1] == 'chroma:document':
+                        page_data[table[1]] = table[2]
+                    if table[1] == 'page':
+                        page_data[table[1]] = table[3]
+
                 data = {
-                    'vector': vector,
-                    'text': page['text'],
-                    'page_num': page['page_num'],
-                    'orig_file': page['path'],
+                    # 'vector': vector,
+                    'text': page_data['chroma:document'],
+                    'page_num': page_data['page'],
+                    'orig_file': page_data['source'],
                 }
 
-                self.milvus_client.insert(collection_name='embeddings', data=data)
-        return 'Knowledge-base updated!'
-        
-        
+                self.milvus_client.insert('embeddings', data=data)
