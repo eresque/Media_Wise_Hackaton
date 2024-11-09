@@ -39,6 +39,8 @@ class Pipeline:
         connections.connect(host='milvus-standalone', port='19530', token='root:Milvus')
         collection = Collection('embeddings')
 
+        collection.load()
+
         conn = sqlite3.connect('./backend/data/vector_db/chroma.sqlite3')
         cursor = conn.cursor()
 
