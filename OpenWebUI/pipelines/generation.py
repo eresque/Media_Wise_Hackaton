@@ -34,22 +34,12 @@ class Pipeline:
         connections.connect(host='milvus-standalone', port='19530', token='root:Milvus')
         collection = Collection('embeddings')
 
-        index_params = {
-            "metric_type":"COSINE",
-            "index_type":"HNSW",
-            "params": {
-                "M": 16,
-                "efConstruction": 200,
-            }
-        }
-
-        collection.create_index('vector', index_params)
-
         search_params = {
             "metric_type": "COSINE",
             "params": {"ef": 64}  # Size of the dynamic candidate list during search
         }
 
+        collection.load()
 
         res = collection.search(
             data=vector,
@@ -57,5 +47,7 @@ class Pipeline:
             limit=10, #TDB
             output_fields=['page_num', 'text', 'orig_file']
         )
+
+        collection.release()
 
         return json.dumps(res)

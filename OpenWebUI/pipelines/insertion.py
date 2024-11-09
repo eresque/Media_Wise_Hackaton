@@ -39,14 +39,6 @@ class Pipeline:
         connections.connect(host='milvus-standalone', port='19530', token='root:Milvus')
         collection = Collection('embeddings')
 
-        index_params = {
-            "metric_type":"COSINE",
-            "index_type":"HNSW",
-            #"params":{"nlist":1024}
-        }
-
-        collection.create_index('vector', index_params)
-
         conn = sqlite3.connect('./backend/data/vector_db/chroma.sqlite3')
         cursor = conn.cursor()
 
@@ -84,8 +76,24 @@ class Pipeline:
 
             collection.insert(data=data)
             
+            yield f'Added {len(vectors)} rows! '
+
+        
+        if collection.has_index():
+            collection.drop_index()
+
+
+        index_params = {
+            "metric_type":"COSINE",
+            "index_type":"HNSW",
+            "params": {
+                "M": 16,
+                "efConstruction": 200,
+            }
+        }
+
+        collection.create_index('vector', index_params)
+
         collection.flush()
 
-        res = json.dumps([collection.num_entities])
-
-        return res
+        return 'DONE!'
