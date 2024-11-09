@@ -60,6 +60,11 @@ class Pipeline:
 
         collection.release()
 
+        yield json.dumps({
+            'query': user_message,
+            'documents': documents,
+        })
+
         response = requests.post('http://reranker_inference:8081/rerank', json={
             'query': user_message,
             'documents': documents,
