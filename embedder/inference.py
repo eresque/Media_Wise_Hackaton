@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
 import asyncio
@@ -6,7 +7,7 @@ import asyncio
 model = SentenceTransformer('deepvk/USER-bge-m3')
 
 app = FastAPI()
-
+app.add_middleware( CORSMiddleware, allow_origins=['*'] )
 
 class SentenceRequest(BaseModel):
     sentences: list[str]

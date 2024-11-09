@@ -6,13 +6,15 @@ import sqlite3
 
 from dotenv import load_dotenv
 
+import requests
+import json
+
 load_dotenv()
 
-import logging
-logging.basicConfig(level=logging.INFO)
-
-def text2vec(text: str) -> list:
-    return [1 for _ in range(1024)]
+def text2vec(doc: list[str]) -> list:
+    return requests.post('http://embedder_inference:8082/embed', json={
+        'sentences': doc
+    }).json()['embeddings']
 
 def pdf2text(path: str) -> list[dict]:
     result = []
@@ -57,6 +59,8 @@ class Pipeline:
 
         for file_data in body.get('file_data'):
             file_id = file_data['id']
+
+            meta_data = []
         
             cursor.execute(f'SELECT id FROM embedding_metadata WHERE "key" = "file_id" and "string_value" = "{file_id}"')
             table_ids = cursor.fetchall()
@@ -73,11 +77,23 @@ class Pipeline:
                     if table[1] == 'page':
                         page_data[table[1]] = table[3]
 
-                data = {
-                    # 'vector': vector,
-                    'text': page_data['chroma:document'],
-                    'page_num': page_data['page'],
-                    'orig_file': page_data['source'],
-                }
+                meta_data.append(page_data)
 
-                self.milvus_client.insert('embeddings', data=data)
+            document_content = [page['chroma:document'] for page in meta_data]
+            vectors = text2vec(document_content)
+
+            import logging
+            logging.basicConfig(level=logging.INFO)
+
+            logging.info(vectors)
+
+            data = [ {
+                'vector': vectors[i],
+                'text': document_content[i],
+                'page_num': meta_data[i]['page'],
+                'orig_file': meta_data[i]['source']
+            } for i in range(len(vectors))]
+
+            self.milvus_client.insert('embeddings', data=data)
+
+        return '\n'.join(self.milvus_client.list_indexes('embeddings', 'orig_file'))
