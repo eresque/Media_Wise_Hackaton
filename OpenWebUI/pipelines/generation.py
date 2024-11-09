@@ -50,11 +50,17 @@ class Pipeline:
             output_fields=['page_num', 'text', 'orig_file']
         )
 
+        documents = []
+
         for hits in res:
             for hit in hits:
-                yield f'db id: {hit.entity.get('id')}\n'
-                yield f'page: {hit.entity.get('page_num')}\n'
-                yield f'orig_file: {hit.entity.get('orig_file')}\n'
-                yield f'text: {hit.entity.get('text')}\n\n'
+                documents.append(hit.entity.get('text'))
+
+                yield f'db id: {hit.entity.get("id")}\n'
+                yield f'page: {hit.entity.get("page_num")}\n'
+                yield f'orig_file: {hit.entity.get("orig_file")}\n'
+                yield f'text: {hit.entity.get("text")}\n\n'
 
         collection.release()
+
+        #response = requests.post()
