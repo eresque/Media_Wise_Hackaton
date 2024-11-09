@@ -18,17 +18,19 @@ class Pipeline:
         self.name = "Generation" 
 
     async def on_startup(self):
-        self.milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
-
-        if not self.milvus_client.has_collection(collection_name='embeddings'):
-            self.milvus_client.create_collection('embeddings', 1024, auto_id=True)
+        pass
 
     async def on_shutdown(self):
-        self.milvus_client.close()
+        pass
 
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
+        
+        self.milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
+
+        if not self.milvus_client.has_collection(collection_name='embeddings'):
+            self.milvus_client.create_collection('embeddings', 1024, auto_id=True)
         
         vector = text2vec(user_message)
 
@@ -39,6 +41,6 @@ class Pipeline:
             output_fields=['page_num', 'text', 'orig_file']
         )
 
-        
+        self.milvus_client.close()
 
         return 'working'

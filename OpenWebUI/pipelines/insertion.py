@@ -95,4 +95,4 @@ class Pipeline:
 
         self.milvus_client.close()
 
-        return json.dumps(self.milvus_client.describe_collection('embeddings'))
+        return json.dumps(self.milvus_client.get_collection_stats('embeddings'))
