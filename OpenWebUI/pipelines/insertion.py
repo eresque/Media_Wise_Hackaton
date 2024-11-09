@@ -62,7 +62,7 @@ class Pipeline:
                     if table[1] == 'page':
                         page_data[table[1]] = table[3]
 
-                if len(collection.query(f'orig_file == {page_data["source"]}')) > 0:
+                if len(collection.query(f'orig_file == "{page_data["source"]}"')) > 0:
                     yield f'Detected existing file {page_data["source"]}\n'
                     continue
 
