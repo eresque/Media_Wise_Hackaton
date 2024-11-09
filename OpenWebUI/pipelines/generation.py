@@ -21,10 +21,7 @@ class Pipeline:
         self.name = "Generation" 
 
     async def on_startup(self):
-        milvus_client = MilvusClient(uri="http://milvus-standalone:19530", token='root:Milvus')
-        if not milvus_client.has_collection(collection_name='embeddings'):
-            milvus_client.create_collection('embeddings', 1024, auto_id=True)
-        milvus_client.close()
+        pass
 
     async def on_shutdown(self):
         pass
