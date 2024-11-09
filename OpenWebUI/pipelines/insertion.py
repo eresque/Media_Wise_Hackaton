@@ -80,6 +80,7 @@ class Pipeline:
 
         
         if collection.has_index():
+            collection.release()
             collection.drop_index()
 
 
