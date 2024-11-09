@@ -43,11 +43,16 @@ class Pipeline:
 
         res = collection.search(
             data=vector,
+            anns_field='vector',
             param=search_params,
             limit=10, #TDB
             output_fields=['page_num', 'text', 'orig_file']
         )
 
+        yield 'Top 10 results:\n'
+        for hit in res[0]:
+            yield f'ID: {hit.id}, Distance: {hit.distance}\n'
+
         collection.release()
 
-        return json.dumps(res)
+        return 
