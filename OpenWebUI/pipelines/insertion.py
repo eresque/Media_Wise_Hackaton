@@ -76,7 +76,7 @@ class Pipeline:
 
             collection.insert(data=data)
             
-            yield f'Added {len(vectors)} rows! '
+            yield f'Added {len(vectors)} rows!\n'
 
         
         if collection.has_index():
@@ -94,7 +94,9 @@ class Pipeline:
         }
 
         collection.create_index('vector', index_params)
+        yield 'Indexed!\n'
 
         collection.flush()
+        yield 'Flushed!\n'
 
         return 'DONE!'
