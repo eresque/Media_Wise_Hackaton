@@ -73,11 +73,8 @@ class Pipeline:
 
                 meta_data.append(page_data)
 
-            if exists:
-                continue
-
             document_content = [page['chroma:document'] for page in meta_data]
-            if len(document_content) <= 0:
+            if exists or len(document_content) <= 0:
                 continue
 
             vectors = text2vec(document_content)
@@ -87,7 +84,7 @@ class Pipeline:
                 'text': document_content[i],
                 'page_num': meta_data[i]['page'],
                 'orig_file': meta_data[i]['source']
-            } for i in range(len(vectors))]
+            } for i in range(len(vectors)) if meta_data[i].get('page') and meta_data[i].get('source')]
 
             collection.insert(data=data)
             
