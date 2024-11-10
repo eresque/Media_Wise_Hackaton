@@ -50,7 +50,7 @@ async def llm_response_streaming(query: Query) -> StreamingResponse:
         )
 
         request_data = {
-            "modelUri": "gpt://b1gjp5vama10h4due384/yandexgpt-32k/rc",
+            "modelUri": "gpt://b1g01v870k6mm5v3k1gb/yandexgpt-32k/rc",
             "completionOptions": {
                 "stream": True,
                 "temperature": 0.2,
@@ -87,7 +87,7 @@ async def llm_response(query: Query) -> dict:
     )
 
     request_data = {
-        "modelUri": "gpt://b1gjp5vama10h4due384/yandexgpt-32k/rc",
+        "modelUri": "gpt://b1g1ds4rgd0b0c9nvk18/yandexgpt-32k/rc",
         "completionOptions": {
             "stream": False,
             "temperature": 0.2,

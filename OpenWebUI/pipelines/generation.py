@@ -79,10 +79,6 @@ class Pipeline:
             'documents': documents,
         }).json()
 
-        if rerank_response['ranked_documents'][0][0] < 0.1:
-            yield 'По вашему запросу не найдено релевантных данных.\n'
-            return
-
         top_metadata = [metadata[documents.index(doc_data[1])] for doc_data in rerank_response['ranked_documents']]
         top_file_name = top_metadata[0]['orig'].split('/')[-1].split('_')[-1]
 
