@@ -77,6 +77,9 @@ class Pipeline:
                 continue
 
             document_content = [page['chroma:document'] for page in meta_data]
+            if len(document_content) <= 0:
+                continue
+
             vectors = text2vec(document_content)
 
             data = [ {
