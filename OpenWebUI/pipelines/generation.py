@@ -90,7 +90,7 @@ class Pipeline:
 
         pdf_file.save(generated_path_dir + generated_filename)
 
-        yield f'[http://pdf_retriever:8450/getFile?filename={generated_filename}](Исходные данные)'
+        yield f'[Исходные данные](http://176.114.89.30:8450/getFile?filename={generated_filename})]'
 
         prev_response = ''
         with requests.post('http://llm_inference:8087/llm-response-streaming', json={
