@@ -8,14 +8,19 @@ from pymilvus.client.abstract import SearchResult
 
 from rouge_score import rouge_scorer
 
+import nltk
 from nltk.translate.bleu_score import sentence_bleu
 from nltk.tokenize import word_tokenize
+
+nltk.download('punkt_tab')
+
 
 import logging
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+N_RECORDS = 30
 
 def calculate_rouge(pred, ref):
     scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
@@ -95,7 +100,7 @@ def generate_rag_predictions(row, ):
 
 
 def main():
-    benchmark_df = pd.read_csv("data/benchmarking_dataset.csv")
+    benchmark_df = pd.read_csv("data/benchmarking_dataset.csv")[:N_RECORDS]
     rag_predictions_df = benchmark_df.progress_apply(generate_rag_predictions, axis=1, )
     rag_predictions_df_lst = rag_predictions_df.tolist()
     answer_pred, filename_pred, slide_number_pred = zip(*rag_predictions_df_lst)
@@ -104,8 +109,11 @@ def main():
     benchmark_df['filename_pred'] = filename_pred
     benchmark_df['slide_number_pred'] = slide_number_pred
 
-    benchmark_df['file_prediction_correctness'] = benchmark_df['filename_pred'] == benchmark_df['filename']
-    benchmark_df['page_prediction_correctness'] = benchmark_df['slide_number'] == benchmark_df['slide_number_pred']
+    benchmark_df['file_prediction_correctness'] = benchmark_df['filename_pred'].astype(str) == benchmark_df['filename'].astype(str)
+    benchmark_df['page_prediction_correctness'] = benchmark_df['slide_number'].astype(str) == benchmark_df['slide_number_pred'].astype(str)
+
+    benchmark_df.to_csv("./data/benchmark_pre_calc_metrics.csv", index=False)
+    # benchmark_df = pd.read_csv("./data/benchmark_pre_calc_metrics.csv")
 
     benchmark_df['blue'] = benchmark_df.apply(calculate_bleu, axis=1)
 
