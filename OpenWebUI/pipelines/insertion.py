@@ -52,6 +52,8 @@ class Pipeline:
             cursor.execute(f'SELECT id FROM embedding_metadata WHERE "key" = "file_id" and "string_value" = "{file_id}"')
             table_ids = cursor.fetchall()
 
+            exists = False
+
             for table_id in table_ids:
                 page_data = {}
 
@@ -66,11 +68,13 @@ class Pipeline:
 
                 if len(collection.query(f'orig_file == "{page_data["source"]}"')) > 0:
                     yield f'Detected existing file {page_data["source"]}\n'
-                    continue
+                    exists = True
+                    break
 
                 meta_data.append(page_data)
 
-            
+            if exists:
+                continue
 
             document_content = [page['chroma:document'] for page in meta_data]
             vectors = text2vec(document_content)
