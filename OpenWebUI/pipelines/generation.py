@@ -83,7 +83,7 @@ class Pipeline:
         top_file_name = top_metadata[0]['orig'].split('/')[-1].split('_')[-1].split('.')[0]
 
         pdf_file = pymupdf.open(top_metadata[0]['orig'])
-        pdf_file.select(top_metadata[0]['page'], top_metadata[0]['page'] + 1)
+        pdf_file.select([top_metadata[0]['page'], top_metadata[0]['page'] + 1])
         
         generated_path_dir = '/app/backend/data/generated/'
         generated_filename = body['user']['id'] + datetime.datetime.now().strftime('%d_%m_%y_%H_%M_%S') + ".pdf"
