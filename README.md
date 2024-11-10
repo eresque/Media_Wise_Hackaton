@@ -5,7 +5,8 @@
 ├── benchmarking
 │   ├── data
 │   │   └── benchmarking_data.csv
-│   └── evaluate_pipe.py
+│   ├── evaluate_pipe.py
+│   └── requirements.txt
 ├── embedder
 │   ├── Dockerfile
 │   ├── inference.py
@@ -43,4 +44,23 @@ docker compose up --build
 ```
 
 ## Usage 
-By now the project is up and running. To start using it go to `http://localhsot:3057`
+By now the project is up and running. To start using it go to `http://localhsot:3057` </br>
+Select `Insertion` option in toggle menu:
+![Screenshot](docs/images/insertion_1.jpg)
+Using `+` symbol upload files and send `upload file` message:
+![Screenshot](docs/images/insertion_2.jpg)
+After this you are good to go! </br>
+Navigate to `Generation` option in toggle menu and write your prompt:
+![Screenshot](docs/images/generation_1.jpg)
+Send message and enjoy your answer!
+# Benchmarking
+You need to run all the containers via `docker compose` as listed above. </br>
+Additionally you have to upload files to the knowledge base.
+## Launch commands
+```commandline
+cd ./benchmarking
+pip install -r requirements.txt
+python evaluate_pipe.py
+```
+## Results 
+The results will be printed in script execution logs and also saved `./data` folder as `benchmarking_results.csv`.

@@ -11,6 +11,11 @@ from rouge_score import rouge_scorer
 from nltk.translate.bleu_score import sentence_bleu
 from nltk.tokenize import word_tokenize
 
+import logging
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def calculate_rouge(pred, ref):
     scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
@@ -85,13 +90,12 @@ def generate_rag_predictions(row, ):
         'prompt': query,
         'context': ' '.join([doc_data[1] for doc_data in rerank_response['ranked_documents']])
     }).json()
-    print(llm_response)
     llm_response = llm_response['response']
     return llm_response, file_name_pred, page_pred
 
 
 def main():
-    benchmark_df = pd.read_csv("./data/benchmarking_data.csv")
+    benchmark_df = pd.read_csv("data/benchmarking_dataset.csv")
     rag_predictions_df = benchmark_df.progress_apply(generate_rag_predictions, axis=1, )
     rag_predictions_df_lst = rag_predictions_df.tolist()
     answer_pred, filename_pred, slide_number_pred = zip(*rag_predictions_df_lst)
@@ -100,12 +104,17 @@ def main():
     benchmark_df['filename_pred'] = filename_pred
     benchmark_df['slide_number_pred'] = slide_number_pred
 
-    benchmark_df['file_accuracy'] = benchmark_df['filename_pred'] == benchmark_df['filename']
-    benchmark_df['page_accuracy'] = benchmark_df['slide_number'] == benchmark_df['slide_number_pred']
+    benchmark_df['file_prediction_correctness'] = benchmark_df['filename_pred'] == benchmark_df['filename']
+    benchmark_df['page_prediction_correctness'] = benchmark_df['slide_number'] == benchmark_df['slide_number_pred']
 
     benchmark_df['blue'] = benchmark_df.apply(calculate_bleu, axis=1)
-    print(benchmark_df.info())
-    benchmark_df.to_csv("bech_Res.csv", index=False)
+
+    logging.info(f"File prediction accuracy: {benchmark_df['file_prediction_correctness'].mean()}")
+    logging.info(f"Page prediction accuracy: {benchmark_df['page_prediction_correctness'].mean()}")
+
+    logging.info(f"Mean BLUE score: {benchmark_df['blue'].mean()}")
+
+    benchmark_df.to_csv("./data/benchmarking_results.csv", index=False)
 
 
 if __name__ == "__main__":
