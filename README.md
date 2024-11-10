@@ -2,13 +2,34 @@
 # Project structure 
 ```commandline
 .
-├── docker-compose.yml
+├── benchmarking
+│   ├── data
+│   │   └── benchmarking_data.csv
+│   └── evaluate_pipe.py
+├── embedder
+│   ├── Dockerfile
+│   ├── inference.py
+│   └── requirements.txt
+├── llm
+│   ├── Dockerfile
+│   ├── inference.py
+│   ├── prompts.py
+│   ├── __pycache__
+│   │   ├── inference.cpython-311.pyc
+│   │   └── prompts.cpython-310.pyc
+│   └── requirements.txt
 ├── OpenWebUI
 │   └── pipelines
-│       ├── Dockerfile
 │       ├── generation.py
-│    └── requirements.txt
-└── README.md
+│       ├── insertion.py
+│       └── requirements.txt
+├── reranker
+│   ├── Dockerfile
+│   ├── inference.py
+│   └── requirements.txt
+├── README.md
+├── docker-compose.yml
+└── Dockerfile-openwebui-pipeline
 
 ```
 # Project launch 
