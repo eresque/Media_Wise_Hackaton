@@ -1,7 +1,6 @@
 from typing import List, Union, Generator, Iterator
 from pydantic import BaseModel
 from pymilvus import MilvusClient, Collection, connections
-import pymupdf
 import sqlite3
 
 from dotenv import load_dotenv
@@ -11,10 +10,12 @@ import json
 
 load_dotenv()
 
+
 def text2vec(doc: list[str]) -> list:
     return requests.post('http://embedder_inference:8082/embed', json={
         'sentences': doc
     }).json()['embeddings']
+
 
 class Pipeline:
     class Valves(BaseModel):
@@ -25,7 +26,7 @@ class Pipeline:
 
     async def on_startup(self):
         pass
-        
+
     async def on_shutdown(self):
         pass
 
@@ -34,7 +35,7 @@ class Pipeline:
         return body
 
     def pipe(
-        self, user_message: str, model_id: str, messages: List[dict], body: dict
+            self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
         connections.connect(host='milvus-standalone', port='19530', token='root:Milvus')
         collection = Collection('embeddings')
@@ -48,8 +49,9 @@ class Pipeline:
             file_id = file_data['id']
 
             meta_data = []
-        
-            cursor.execute(f'SELECT id FROM embedding_metadata WHERE "key" = "file_id" and "string_value" = "{file_id}"')
+
+            cursor.execute(
+                f'SELECT id FROM embedding_metadata WHERE "key" = "file_id" and "string_value" = "{file_id}"')
             table_ids = cursor.fetchall()
 
             exists = False
@@ -79,7 +81,7 @@ class Pipeline:
 
             vectors = text2vec(document_content)
 
-            data = [ {
+            data = [{
                 'vector': vectors[i],
                 'text': document_content[i],
                 'page_num': meta_data[i]['page'],
@@ -87,18 +89,16 @@ class Pipeline:
             } for i in range(len(vectors)) if meta_data[i].get('page') and meta_data[i].get('source')]
 
             collection.insert(data=data)
-            
+
             yield f'Added {len(vectors)} rows!\n'
 
-        
         if collection.has_index():
             collection.release()
             collection.drop_index()
 
-
         index_params = {
-            "metric_type":"COSINE",
-            "index_type":"HNSW",
+            "metric_type": "COSINE",
+            "index_type": "HNSW",
             "params": {
                 "M": 16,
                 "efConstruction": 200,

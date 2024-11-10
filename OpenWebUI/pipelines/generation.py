@@ -6,21 +6,22 @@ from pymilvus.client.abstract import SearchResult
 from dotenv import load_dotenv
 import requests
 import json
-import pymupdf
 
 load_dotenv()
+
 
 def text2vec(doc: list[str]) -> list:
     return requests.post('http://embedder_inference:8082/embed', json={
         'sentences': doc
     }).json()['embeddings']
 
+
 class Pipeline:
     class Valves(BaseModel):
         pass
 
     def __init__(self):
-        self.name = "Generation" 
+        self.name = "Generation"
 
     async def on_startup(self):
         pass
@@ -29,7 +30,7 @@ class Pipeline:
         pass
 
     def pipe(
-        self, user_message: str, model_id: str, messages: List[dict], body: dict
+            self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
         latest_message = messages[-1]['content']
 
@@ -81,11 +82,11 @@ class Pipeline:
         prev_response = ''
 
         with requests.post('http://llm_inference:8087/llm-response-streaming', json={
-                'prompt': latest_message,
-                'context': ' '.join([doc_data[1] for doc_data in rerank_response['ranked_documents']])
-            }, stream=True) as r:
+            'prompt': latest_message,
+            'context': ' '.join([doc_data[1] for doc_data in rerank_response['ranked_documents']])
+        }, stream=True) as r:
             r.raise_for_status()
-            for chunk in r.iter_content(chunk_size=None): 
+            for chunk in r.iter_content(chunk_size=None):
                 resp = json.loads(chunk)['response']
                 yield resp.replace(prev_response, '')
                 prev_response = resp

@@ -20,8 +20,7 @@ import json
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
-app.add_middleware( CORSMiddleware, allow_origins=['*'] )
-
+app.add_middleware(CORSMiddleware, allow_origins=['*'])
 
 LLM_INSTRUCTION = PROMPTS['llm_instructions']
 QUESTION = PROMPTS['question']
@@ -41,8 +40,9 @@ class Query(BaseModel):
     prompt: str
     context: Optional[str] = ""
 
+
 @app.post('/llm-response-streaming')
-async def llm_response_streaming(query: Query):
+async def llm_response_streaming(query: Query) -> StreamingResponse:
     def streamer():
         _question = QUESTION.format(
             context=query.context,
@@ -78,7 +78,7 @@ async def llm_response_streaming(query: Query):
 
 
 @app.post("/llm-response")
-async def llm_response(query: Query):
+async def llm_response(query: Query) -> dict:
     logging.info("GPT GENERATION")
 
     _question = QUESTION.format(

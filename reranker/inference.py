@@ -8,7 +8,7 @@ import os
 os.environ['HF_HOME'] = '/models'
 
 app = FastAPI()
-app.add_middleware( CORSMiddleware, allow_origins=['*'] )
+app.add_middleware(CORSMiddleware, allow_origins=['*'])
 
 RERANKER_MODEL = CrossEncoder('DiTy/cross-encoder-russian-msmarco', max_length=512, device='cuda')
 
@@ -19,7 +19,7 @@ class RerankRequest(BaseModel):
     top_k: int = 3
 
 
-def rerank_documents(query: str, documents: list, top_k: int = 3):
+def rerank_documents(query: str, documents: list, top_k: int = 3) -> list[(float, str)]:
     pairs = [[query, doc] for doc in documents]
     scores = RERANKER_MODEL.predict(pairs)
     scored_documents = list(zip(scores.tolist(), documents))
