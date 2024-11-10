@@ -6,7 +6,7 @@ import os
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=['*'])
 
-pdf_directory_path = '/app/backend/data/generated/'
+pdf_directory_path = '/app/backend/data/'
 if __name__ == '__main__':
     os.mkdir(pdf_directory_path)
 
