@@ -83,14 +83,14 @@ class Pipeline:
         top_file_name = top_metadata[0]['orig'].split('/')[-1].split('_')[-1].split('.')[0]
 
         pdf_file = pymupdf.open(top_metadata[0]['orig'])
-        pdf_file.select([top_metadata[0]['page'], top_metadata[0]['page'] + 1])
+        pdf_file.select([top_metadata[0]['page']])
         
         generated_path_dir = '/app/backend/data/'
         generated_filename = body['user']['id'] + datetime.datetime.now().strftime('%d_%m_%y_%H_%M_%S') + ".pdf"
 
         pdf_file.save(generated_path_dir + generated_filename)
 
-        yield f'[Исходные данные](http://176.114.89.30:8450/getFile?filename={generated_filename})]'
+        yield f'[Исходные данные](http://176.114.89.30:8450/getFile?filename={generated_filename})\n'
 
         prev_response = ''
         with requests.post('http://llm_inference:8087/llm-response-streaming', json={
