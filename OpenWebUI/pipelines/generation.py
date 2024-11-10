@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 import requests
 import json
 
+import pymupdf
+import datetime
+
 load_dotenv()
 
 
@@ -77,13 +80,19 @@ class Pipeline:
         }).json()
 
         top_metadata = [metadata[documents.index(doc_data[1])] for doc_data in rerank_response['ranked_documents']]
+        top_file_name = top_metadata[0]['orig'].split('/')[-1].split('_')[-1].split('.')[0]
 
-        top_file_name = top_metadata[0]['orig'].split('/')[-1].split('_')[1].split('.')[0]
+        pdf_file = pymupdf.open(top_metadata[0]['orig'])
+        pdf_file.select(top_metadata[0]['page'], top_metadata[0]['page'] + 1)
+        
+        generated_path_dir = '/app/backend/data/generated/'
+        generated_filename = body['user']['id'] + datetime.datetime.now().strftime('%d_%m_%y_%H_%M_%S') + ".pdf"
 
-        yield f'File: {top_file_name}\nPage: {top_metadata[0]["page"] + 1}\n'
+        pdf_file.save(generated_path_dir + generated_filename)
+
+        yield f'[http://pdf_retriever:8450/getFile?filename={generated_filename}](Исходные данные)'
 
         prev_response = ''
-
         with requests.post('http://llm_inference:8087/llm-response-streaming', json={
             'prompt': latest_message,
             'context': ' '.join([doc_data[1] for doc_data in rerank_response['ranked_documents']])
@@ -93,3 +102,5 @@ class Pipeline:
                 resp = json.loads(chunk)['response']
                 yield resp.replace(prev_response, '')
                 prev_response = resp
+
+        

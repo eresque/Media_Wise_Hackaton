@@ -136,6 +136,18 @@ services:
               count: 1
               capabilities: [ gpu ]
 
+  file_retriever:
+    container_name: pdf_retriever
+    build:
+      context: ./retriever
+      dockerfile: Dockerfile
+    ports:
+      - "8450:8450"
+    restart: unless-stopped
+    volumes:
+      - open-webui-data:/app/backend/data
+
+
 networks:
   default:
     name: milvus
