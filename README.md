@@ -14,9 +14,6 @@
 │   ├── Dockerfile
 │   ├── inference.py
 │   ├── prompts.py
-│   ├── __pycache__
-│   │   ├── inference.cpython-311.pyc
-│   │   └── prompts.cpython-310.pyc
 │   └── requirements.txt
 ├── OpenWebUI
 │   └── pipelines
